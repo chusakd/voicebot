@@ -1,0 +1,218 @@
+#include <BleKeyboard.h>
+#include "DFRobot_DF2301Q.h"
+
+BleKeyboard bleKeyboard;
+DFRobot_DF2301Q_I2C DF2301Q;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Starting BLE work!");
+  bleKeyboard.begin();
+
+  if (bleKeyboard.isConnected()) {
+    Serial.println("Communication with Abdule failed, please check connection");
+    delay(3000);
+  }
+
+  while (!(DF2301Q.begin())) {
+    Serial.println("Communication with DF230IQ failed, please check connection");
+    delay(3000);
+  }
+
+
+
+
+  DF2301Q.setVolume(7);
+
+  /**
+   * @brief Set mute mode
+   * @param mode - Mute mode; set value 1: mute, 0: unmute
+   */
+   DF2301Q.setMuteMode(0);
+
+  /**
+   * @brief Set wake-up duration
+   * @param wakeTime - Wake-up duration (0-255)
+   */
+  DF2301Q.setWakeTime(15);
+
+  /**
+   * @brief Get wake-up duration
+   * @return The currently-set wake-up period
+   */
+  uint8_t wakeTime = 0;
+  wakeTime = DF2301Q.getWakeTime();
+  Serial.print("wakeTime = ");
+  Serial.println(wakeTime);
+  Serial.println("System Ready !!!");
+
+  //DF2301Q.playByCMDID(1);   // Wake-up command
+  DF2301Q.playByCMDID(23);  // Common word ID
+}
+
+void loop() {
+  /**
+     @brief Get the ID corresponding to the command word 
+     @return Return the obtained command word ID, returning 0 means no valid ID is obtained
+  */
+  uint8_t CMDID = DF2301Q.getCMDID();
+  if (CMDID != 0) {
+    Serial.print("CMDID = ");  //Printing command ID
+    Serial.println(CMDID);
+  }
+  switch (CMDID) {
+    case 5 มันคือ Micah:  // เปิด Terminal
+      Serial.println("Open Terminal");
+      sendAlfredCommand("Termius");
+      delay(500);
+      Serial.println("Termius Opened");
+      bleKeyboard.releaseAll();
+      break;
+    case 6:  // เปิดระบบพิมพ์ด้วยเสียง
+
+      Serial.println("Voice typing mode");
+      bleKeyboard.press(KEY_LEFT_SHIFT);
+      bleKeyboard.press(KEY_LEFT_GUI);
+      bleKeyboard.press(KEY_RETURN);
+      delay(500);
+      bleKeyboard.releaseAll();
+      break;
+    case 7:  // เปิด micrososft word
+      Serial.println("Open MS Word");
+      sendAlfredCommand("word");
+      delay(500);
+      bleKeyboard.press(KEY_RETURN);
+      bleKeyboard.releaseAll();
+      break;
+    case 8:  // แสดง QR Code
+//      M5.Lcd.fillScreen(BLACK);
+//      M5.Lcd.qrcode("http://www.m5stack.com", 0, 0, 150, 6);
+      break;
+    case 9:  // เปิด Excel
+      Serial.println("Open MS Excel");
+      sendAlfredCommand("Microsoft Excel");
+      delay(500);
+      bleKeyboard.press(KEY_RETURN);
+      bleKeyboard.releaseAll();
+      break;
+    case 10:  // เปิด Spotify
+      Serial.println("Open Spotify");
+      sendAlfredCommand("spotify");
+      delay(500);
+      bleKeyboard.press(KEY_RETURN);
+      bleKeyboard.releaseAll();
+      break;
+    case 11:  // Alfred ตื่นทำงาน
+      Serial.println("Wake up alfred");
+      wakeupAlfred();
+      break;
+    case 12: // Close Windows
+      Serial.println("Close Windows");
+      bleKeyboard.press(KEY_LEFT_GUI);
+      bleKeyboard.press('w');
+      delay(500);
+      bleKeyboard.releaseAll();
+      break;
+    case 13: //เปิด Arduino IDE 
+      Serial.println("Open Arduino IDE");
+      sendAlfredCommand("Arduino");
+      delay(500);
+      bleKeyboard.press(KEY_RETURN);
+      bleKeyboard.releaseAll();
+      break;
+    case 14: // เปลี่ยน  Config
+      Serial.println("Change Configuration");
+      /* 1. What you want to change ? {$1}
+            1.1 Change Response Mode. to -> text/voice {$2}
+            1.2 Change PromptpayID {$2}. 
+         2. Change {$1} to {$2} Done !. 
+            reponse mode (text, voice), promptpayID,  
+      */
+      break;
+    case 15: // master host
+      Serial.print("Open storage master host"); 
+      bleKeyboard.write(KEY_TAB);
+      bleKeyboard.write('pea-storage-master01');
+      bleKeyboard.write(KEY_RETURN);
+      bleKeyboard.write(KEY_TAB);
+      bleKeyboard.press(KEY_RETURN);
+      delay(100);
+      bleKeyboard.releaseAll();
+      break;
+    case 16: //ESC
+      Serial.print("ESC press"); 
+      bleKeyboard.press(KEY_ESC);
+      delay(300);
+      bleKeyboard.releaseAll();
+      break;
+    case 17: //เปิด Browser
+      Serial.println("Open Browser");
+      sendAlfredCommand("chrome");
+      delay(100);
+      bleKeyboard.press(KEY_RETURN);
+      bleKeyboard.releaseAll();
+      break;
+    case 92: // play/pause music
+      Serial.print("Play music press"); 
+      bleKeyboard.press(KEY_MEDIA_PLAY_PAUSE);
+      delay(300);
+      bleKeyboard.releaseAll();
+      break;
+    case 93: //stop playing
+      Serial.print("Stop playing press"); 
+      bleKeyboard.press(KEY_MEDIA_STOP);
+      delay(300);
+      bleKeyboard.releaseAll();
+      break;
+    case 95: // The next track
+      Serial.print("Next track press"); 
+      bleKeyboard.press(KEY_MEDIA_NEXT_TRACK);
+      delay(300);
+      bleKeyboard.releaseAll();
+      break;
+    case 96: // Repeat track
+      Serial.print("Repeat track press"); 
+      bleKeyboard.press(KEY_F12);
+      delay(300);
+      bleKeyboard.releaseAll();
+      break;
+    case 97: // Volume Up
+      Serial.print("Volume up press"); 
+      bleKeyboard.press(KEY_MEDIA_VOLUME_UP);
+      delay(300);
+      bleKeyboard.releaseAll();
+      break;
+    case 98: //Volume Down
+      Serial.print("Volume down press"); 
+      bleKeyboard.press(KEY_MEDIA_VOLUME_DOWN);
+      delay(300);
+      bleKeyboard.releaseAll();
+      break;
+    default:
+      if (CMDID != 0) {
+        Serial.print("CMDID = ");  //Printing command ID
+        Serial.println(CMDID);
+      }
+      delay(500);
+      break;
+  }
+  
+}
+
+void wakeupAlfred() {
+    Serial.print("Alfred wake up already !!"); 
+    bleKeyboard.press(KEY_LEFT_ALT);
+    bleKeyboard.press(KEY_RETURN);
+    delay(100);
+    bleKeyboard.releaseAll();
+
+}
+
+void sendAlfredCommand(String keyString) {
+  wakeupAlfred();
+  bleKeyboard.print(keyString);   // Type "iterm".
+  bleKeyboard.write(KEY_RETURN);  // Press the Enter key.
+  delay(100);               // Wait for the computer to register the press.
+  bleKeyboard.releaseAll();       // Release the Enter key.
+}
+
