@@ -1,0 +1,203 @@
+/*************************************************************
+  Blynk is a platform with iOS and Android apps to control
+  ESP32, Arduino, Raspberry Pi and the likes over the Internet.
+  You can easily build mobile and web interfaces for any
+  projects by simply dragging and dropping widgets.
+
+    Downloads, docs, tutorials: https://www.blynk.io
+    Sketch generator:           https://examples.blynk.cc
+    Blynk community:            https://community.blynk.cc
+    Follow us:                  https://www.fb.com/blynkapp
+                                https://twitter.com/blynk_app
+
+  Blynk library is licensed under MIT license
+  This example code is in public domain.
+
+ *************************************************************
+  This example runs directly on ESP32 chip.
+
+  NOTE: This requires ESP32 support package:
+    https://github.com/espressif/arduino-esp32
+
+  Please be sure to select the right ESP32 module
+  in the Tools -> Board menu!
+
+  Change WiFi ssid, pass, and Blynk auth token to run :)
+  Feel free to apply it to any other example. It's simple!
+ *************************************************************/
+
+/* Comment this out to disable prints and save space */
+
+#define BLYNK_PRINT Serial
+
+
+/* Fill in information from Blynk Device Info here */
+//#define BLYNK_TEMPLATE_ID           "TMPxxxxxx"
+//#define BLYNK_TEMPLATE_NAME         "Device"
+//#define BLYNK_AUTH_TOKEN            "YourAuthToken"
+#define BLYNK_TEMPLATE_ID "TMPL6H1WMfnYA"
+#define BLYNK_TEMPLATE_NAME "ATMega328PESP8266"
+#define BLYNK_AUTH_TOKEN "Cd4Qy6SoLyUM0mo7rVOX89qpe6LFUNKn"
+
+#include "DFRobot_DF2301Q.h"
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+
+// Your WiFi credentials.
+// Set password to "" for open networks.
+char ssid[] = "Weed 5G";
+char pass[] = "asdfghjkl";
+
+DFRobot_DF2301Q_I2C DF2301Q;
+
+void setup()
+{
+  // Debug console
+  Serial.begin(19200);
+
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  while (!(DF2301Q.begin())) {
+    Serial.println("Communication with DF230IQ failed, please check connection");
+    delay(3000);
+  }
+
+
+
+
+  DF2301Q.setVolume(7);
+
+  /**
+   * @brief Set mute mode
+   * @param mode - Mute mode; set value 1: mute, 0: unmute
+   */
+   DF2301Q.setMuteMode(0);
+
+  /**
+   * @brief Set wake-up duration
+   * @param wakeTime - Wake-up duration (0-255)
+   */
+  DF2301Q.setWakeTime(15);
+
+  /**
+   * @brief Get wake-up duration
+   * @return The currently-set wake-up period
+   */
+  uint8_t wakeTime = 0;
+  wakeTime = DF2301Q.getWakeTime();
+  Serial.print("wakeTime = ");
+  Serial.println(wakeTime);
+  Serial.println("System Ready !!!");
+
+  //DF2301Q.playByCMDID(1);   // Wake-up command
+  DF2301Q.playByCMDID(23);  // Common word ID
+}
+
+void loop()
+{
+  Blynk.run();
+    /**
+     @brief Get the ID corresponding to the command word 
+     @return Return the obtained command word ID, returning 0 means no valid ID is obtained
+  */
+  uint8_t CMDID = DF2301Q.getCMDID();
+  if (CMDID != 0) {
+    Serial.print("CMDID = ");  //Printing command ID
+    Serial.println(CMDID);
+  }
+  switch (CMDID) {
+    case 5: // Close all valve
+      Serial.println("Close all valve");
+
+      break;
+    case 6:  // Table 1 Water On 
+
+      Serial.println("Table 1 Water On");
+   
+      break;
+    case 7:  // เปิด micrososft word
+      Serial.println("Open MS Word");
+  
+      break;
+    case 8:  // แสดง QR Code
+//      M5.Lcd.fillScreen(BLACK);
+//      M5.Lcd.qrcode("http://www.m5stack.com", 0, 0, 150, 6);
+      break;
+    case 9:  // เปิด Excel
+      Serial.println("Open MS Excel");
+
+      break;
+    case 10:  // เปิด Spotify
+      Serial.println("Open Spotify");
+
+      break;
+    case 11:  // Alfred ตื่นทำงาน
+      Serial.println("Wake up alfred");
+
+      break;
+    case 12: // Close Windows
+      Serial.println("Close Windows");
+
+      delay(500);
+
+      break;
+    case 13: //เปิด Arduino IDE 
+      Serial.println("Open Arduino IDE");
+
+      break;
+    case 14: // เปลี่ยน  Config
+      Serial.println("Change Configuration");
+      /* 1. What you want to change ? {$1}
+            1.1 Change Response Mode. to -> text/voice {$2}
+            1.2 Change PromptpayID {$2}. 
+         2. Change {$1} to {$2} Done !. 
+            reponse mode (text, voice), promptpayID,  
+      */
+      break;
+    case 15: // master host
+      Serial.print("Open storage master host"); 
+
+      break;
+    case 16: //ESC
+      Serial.print("ESC press"); 
+
+      break;
+    case 17: //เปิด Browser
+      Serial.println("Open Browser");
+
+      break;
+    case 92: // play/pause music
+      Serial.print("Play music press"); 
+
+      break;
+    case 93: //stop playing
+      Serial.print("Stop playing press"); 
+
+      break;
+    case 95: // The next track
+      Serial.print("Next track press"); 
+
+      break;
+    case 96: // Repeat track
+      Serial.print("Repeat track press"); 
+
+      break;
+    case 97: // Volume Up
+      Serial.print("Volume up press"); 
+
+      break;
+    case 98: //Volume Down
+      Serial.print("Volume down press"); 
+
+      break;
+    default:
+      if (CMDID != 0) {
+        Serial.print("CMDID = ");  //Printing command ID
+        Serial.println(CMDID);
+      }
+      delay(500);
+      break;
+  }
+  
+}
+
